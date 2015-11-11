@@ -12,11 +12,234 @@ var databaseConnection = require("../Script/mysql_setup.js");
  	5. The Application must have a getRDT method which describes which Replicated Data Type can be used by the Application
  	6. The Application must have a getArrayOfJSONFunctionObjects method which returns an array of function objects of the Application methods
  	7. The Application must have a getExecutableApplicationMethods method which returns an array of excutable functions
- 	8. The Application must have a run method that returns the result of the application
  
  	// nodemon --ignore 'C:\Users\Darlington\Desktop\Docs\Dissertation\Simulation Framework\Apps' --debug ./server.js
 
  */
+
+
+
+
+exports.registerApplication = function(res, formdata) {
+	
+	
+	conn = databaseConnection.getConnectionObject();
+	
+	var fs = require('fs');
+	var queryString = "SELECT * from device";
+	
+	var applicationName = formdata['applicationName'];
+	var applicationDescription = formdata['applicationDescription'];
+	var applicationURL = "";
+	applicationURL = formdata['applicationURL'];	
+	var fileContent ="";
+	var loopChecker = '';
+	
+	var pathname = url.parse(applicationURL).host;
+	
+	var pathName = url.parse(applicationURL).pathname;
+	
+	//Just declare an array that does nothing so I can save the application after downloading it
+	var doNothing = [0];
+	
+	var idExist = false;
+	
+	var getFile = function (doNothing, doneCallback, test) {
+
+		//localhost
+		if(url.parse(applicationURL).host == "localhost:8000"){
+			fs.readFile('.'+pathName, 'utf8', function(err, contents) {
+				fileContent = contents;
+				
+				if(fileContent !=""){
+					
+					var contents = fs.writeFileSync("./Apps"+pathName, fileContent);
+					//return doneCallback(null);
+					fs.writeFile("./Apps"+pathName, fileContent,function(err) {
+					    if(err) {
+					        return console.log(err);
+					    }else {
+					    
+					    	console.log("The file was Downloaded!");
+					    	return doneCallback(null);
+					    }
+					}); 
+				}
+			});
+		} 
+		//external url
+		else{
+			
+			var data = "";
+			  var request = require("http").get(applicationURL, function(res) {
+			
+			    res.on('data', function(chunk) {
+			      data += chunk;
+			    });
+			
+			    res.on('end', function() {
+			    	var pathName = url.parse(applicationURL).pathname;
+			    	var findLastSlash = 0;
+			    	var pname = pathName;
+			    	
+			    	var pathLength = pname.length;
+			    	//console.log("Length is "+pname.length)
+			    	for(var i=0; i<pathLength;i++){
+			    		if(pname[i] == '/'){
+			    			findLastSlash = i;
+			    		}
+			    	}
+			    
+			    	var pathName = pathName.slice(findLastSlash,pathLength);
+			    	
+			    	//console.log("Final Path :"+pathName);
+			    	
+			    	fs.writeFile("./Apps"+pathName, data,function(err) {
+					    if(err) {
+					        return console.log(err);
+					    }
+					 
+					    console.log("The file was Downloaded!"); 
+					    
+					    return doneCallback(null);
+					});
+					
+			    	 
+			    })
+			  });
+
+			  request.on('error', function(e) {
+			    console.log("Got error: " + e.message);
+			  });
+		}	
+		
+	};
+	
+	
+	async.each(doNothing, getFile, function (err) {
+		
+		var pathName = url.parse(applicationURL).pathname;
+    	var findLastSlash = 0;
+    	var pname = pathName;
+    	
+    	//Logic for a js file that might be in several sub directories
+    	var pathLength = pname.length;
+    	//console.log("Length is "+pname.length)
+    	for(var i=0; i<pathLength;i++){
+    		if(pname[i] == '/'){
+    			findLastSlash = i;
+    		}
+    	}
+    
+    	var pathName = pathName.slice(findLastSlash,pathLength);
+
+		//http://localhost:8000/IntegerIncrement.js
+    	//http://localhost:8000/add-content.js
+	    var slash = pathName.split("/");
+	    var dot = slash[1].split(".");
+		var applicationName = dot[0]; 
+		
+		
+		
+		try {
+		    var application = require("../Apps"+pathName);
+		  
+			var applicationObject = new application();
+			
+			var executableMethods = applicationObject.getExecutableApplicationMethods();
+				for(var j=0; j<executableMethods.length;j++){
+				//console.log(executableMethods[j]());
+			}
+			
+			var functionObjects = applicationObject.getArrayOfJSONFunctionObjects();
+				
+			//Generate unique id
+			var shortid  =require('shortid');
+			var applicationId = shortid.generate();
+			
+		 
+		 	var sql = "SELECT * FROM application ";	//where applicationId='" + applicationId + "'";
+		 	var sqlQuery = [];
+		 	sqlQuery[0] = sql;
+			
+			sql = sqlQuery[0];
+			conn.query(sql, function(error, results,fields){
+				if(error)
+					throw error;
+				else {
+					
+					for (var i in results) {
+						
+						if(applicationName==results[i]['applicationName'] || applicationId==results[i]['applicationId']){
+							idExist = true;
+						}
+				    }
+			
+					if(idExist == false){
+	
+						var application = {
+								applicationId: applicationId,
+								applicationName: applicationName,
+								applicationDescription: applicationDescription,
+								applicationURL: applicationURL
+						};
+						
+						var queryString = 'INSERT INTO application set ?';
+						var result = databaseConnection.insertRecord(queryString, application);
+						
+						var functionObjects = applicationObject.getArrayOfJSONFunctionObjects();
+	
+						for(var i=0; i<functionObjects.length;i++){ //functionObjects.length
+							
+							var applicationSignatureDescription = {
+		    						applicationId: applicationId,
+		    						applicationName: applicationName,
+									applicationSignature: functionObjects[i]['signature'],
+									applicationSignatureDescription: functionObjects[i]['description']
+							};
+							
+							var queryString = 'INSERT INTO applicationSignatureDescription set ?';
+							var result = databaseConnection.insertRecord(queryString, applicationSignatureDescription);
+	
+						}
+						loopChecker = true;
+						res.end(applicationName +":  Application Registered");
+						console.log(applicationName +" Registered");
+						
+					}else{
+						console.log("Application Already Registered");
+					}
+				}
+				
+			});
+		} catch(e) {
+		    //process.exit(e.code);
+			//http://localhost:8000/add-content.js
+
+			var appName = String(dot);
+			appName = appName.replace(",", ".");
+
+			var filePath = 'C:\\Users\\Darlington\\Desktop\\Docs\\Dissertation\\Simulation Framework\\Apps\\';
+			//var filePath = '/users/labnet5/gr2/dn7241/Desktop/Dissertation/Apps/';
+			
+			fs.unlink(filePath+appName, function (err) {
+				  if (err) throw err;
+				  console.log('successfully deleted');
+			});
+			
+			loopChecker = false;
+			res.end("Application is NOT provided in the required form");
+			
+		}
+	});
+	
+	if(loopChecker ==true){
+		console.log("STILL CAME IN");
+		res.end(applicationName +":  Application Registered");
+	}
+	
+}
+
 
 exports.getApplicationNames = function(res, formdata){
 	
@@ -128,7 +351,7 @@ exports.browseApplication = function(res, formdata) {
 				
 				table += "<td>"+applicationSignature+"</td>";
 				
-				table += "<td>"+ applicationSignatureDescription['description'] +"</td>";
+				table += "<td>"+ applicationSignatureDescription +"</td>";
 
 				table += "</tr>";
 				
@@ -141,139 +364,6 @@ exports.browseApplication = function(res, formdata) {
 		}
 	});
 	
-}
-
-
-
-exports.registerApplication = function(res, formdata) {
-	
-	
-	conn = databaseConnection.getConnectionObject();
-	
-	var fs = require('fs');
-	var queryString = "SELECT * from device";
-	
-	var applicationName = formdata['applicationName'];
-	var applicationDescription = formdata['applicationDescription'];
-	var applicationURL = "";
-	applicationURL = formdata['applicationURL'];	
-	var fileContent ="";
-	
-	var pathname = url.parse(applicationURL).host;
-	
-	var pathName = url.parse(applicationURL).pathname;
-	
-	//Just declare an array that does nothing so I can save the application after downloading it
-	var doNothing = [0];
-	
-	var idExist = false;
-	
-	var getFile = function (doNothing, doneCallback, test) {
-		
-		//localhost
-		if(url.parse(applicationURL).host == "localhost:8000"){
-			fs.readFile('.'+pathName, 'utf8', function(err, contents) {
-				fileContent = contents;
-				
-				if(fileContent !=""){
-					
-					var contents = fs.writeFileSync("./Apps"+pathName, fileContent);
-					return doneCallback(null);
-					fs.writeFile("./Apps"+pathName, fileContent,function(err) {
-					    if(err) {
-					        return console.log(err);
-					    }else {
-					    
-					    	console.log("The file was Downloaded!");
-					    	return doneCallback(null);
-					    }
-					}); 
-					
-					
-				}
-			});
-		} 
-	};
-	
-	async.each(doNothing, getFile, function (err) {
-		
-		//http://localhost:8000/IntegerIncrement.js
-	    var slash = pathName.split("/");
-	    var dot = slash[1].split(".");
-		var applicationName = dot[0]; 
-		var application = require("../Apps"+pathName);
-		
-		var applicationObject = new application();
-
-		var executableMethods = applicationObject.getExecutableApplicationMethods();
-			for(var j=0; j<executableMethods.length;j++){
-			//console.log(executableMethods[j]());
-		}
-		
-		var functionObjects = applicationObject.getArrayOfJSONFunctionObjects();
-			
-		//Generate unique id
-		var shortid  =require('shortid');
-		var applicationId = shortid.generate();
-		
-	 
-	 	var sql = "SELECT * FROM application ";	//where applicationId='" + applicationId + "'";
-	 	var sqlQuery = [];
-	 	sqlQuery[0] = sql;
-		
-		sql = sqlQuery[0];
-		conn.query(sql, function(error, results,fields){
-			if(error)
-				throw error;
-			else {
-				
-				for (var i in results) {
-					
-					if(applicationName==results[i]['applicationName'] || applicationId==results[i]['applicationId']){
-						idExist = true;
-					}
-			    }
-		
-				if(idExist == false){
-
-					var application = {
-							applicationId: applicationId,
-							applicationName: applicationName,
-							applicationDescription: applicationDescription,
-							applicationURL: applicationURL
-					};
-					
-					var queryString = 'INSERT INTO application set ?';
-					var result = databaseConnection.insertRecord(queryString, application);
-					
-					
-					
-					var functionObjects = applicationObject.getArrayOfJSONFunctionObjects();
-
-					for(var i=0; i<functionObjects.length;i++){ //functionObjects.length
-						
-						var applicationSignatureDescription = {
-	    						applicationId: applicationId,
-	    						applicationName: applicationName,
-								applicationSignature: functionObjects[i]['signature'],
-								applicationSignatureDescription: functionObjects[i]['description']
-						};
-						
-						var queryString = 'INSERT INTO applicationSignatureDescription set ?';
-						var result = databaseConnection.insertRecord(queryString, applicationSignatureDescription);
-
-					}
-					console.log(applicationName +" Registered");
-				}else{
-					console.log("Application Already Registered");
-				}
-			}
-			
-		});
-		
-		
-	});
-	res.end("New Application Registered");
 }
 
 

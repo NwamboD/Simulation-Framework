@@ -1,3 +1,6 @@
+//Changes
+//
+
 
 //Including the modules
 var port = 8000;
@@ -23,8 +26,7 @@ http.createServer(function(req,res){
         	reqData = qs.parse(body);
             
         	reqData = JSON.parse(reqData['data']);
-        	//console.log(reqData);
-        	
+
         	routePath(req, res, pathName);
          });
      }
@@ -38,6 +40,7 @@ http.createServer(function(req,res){
 function routePath(req, res, pathName){
 	
 	if(pathName === '/' || pathName === '/index.html'){
+		res.writeHead(200, {"Content-Type": "text/html"});
 		fs.readFile('./index.html', 'utf8', function(err, contents) {
 			res.end(contents);
 		});	
@@ -46,6 +49,7 @@ function routePath(req, res, pathName){
 	//Network Paths
 	else if(pathName === '/network.html'){
 
+		res.writeHead(200, {"Content-Type": "text/html"});
 		fs.readFile('./View/network.html', 'utf8', function(err, contents) {
 			var Network = require("./Model/Network.js");
 			//Network.showNetworks();	//You need to use exports.showNetworks = function(){} in Network.js file if this is enabled
@@ -77,6 +81,7 @@ function routePath(req, res, pathName){
 	
 	//Device Paths
 	else if(pathName === '/device.html'){
+		res.writeHead(200, {"Content-Type": "text/html"});
 		fs.readFile('./View/device.html', 'utf8', function(err, contents) {
 			var Device = require("./Model/Device.js");
 			res.end(contents);
@@ -93,7 +98,6 @@ function routePath(req, res, pathName){
 			Device.addDevice(res, reqData);
 		}
 		else if(reqData.action && reqData.action == "removeDevice" ) {
-			//console.log("CAME TO REMOVE DEVICE");
 			Device.removeDevice(res, reqData);
 		}
 		else if(reqData.action && reqData.action == "getDeviceNames" ) {
@@ -112,6 +116,7 @@ function routePath(req, res, pathName){
 	
 	//NetworkDevices Paths
 	else if(pathName === '/networkdevices.html'){
+		res.writeHead(200, {"Content-Type": "text/html"});
 		fs.readFile('./View/networkdevices.html', 'utf8', function(err, contents) {
 			var NetworkDevices = require("./Model/NetworkDevices.js");
 			res.end(contents);
@@ -137,6 +142,7 @@ function routePath(req, res, pathName){
 	
 	//Application Paths
 	else if(pathName === '/application.html'){
+		res.writeHead(200, {"Content-Type": "text/html"});
 		fs.readFile('./View/application.html', 'utf8', function(err, contents) {
 			res.end(contents);
 		});
@@ -163,6 +169,7 @@ function routePath(req, res, pathName){
 	
 	//Style Paths
 	else if(pathName === '/style.css'){
+		res.writeHead(200, {"Content-Type": "text/css"});
 		fs.readFile('./Style/style.css', 'utf8', function(err, contents) {
 				res.end(contents);
 		});
@@ -172,6 +179,7 @@ function routePath(req, res, pathName){
 	//else if(pathName === 'maincontroller.js'){
 	
 	else if(pathName === '/mainController.js'){
+		res.writeHead(200, { 'Content-Type': 'text/javascript' });
 		fs.readFile('./Controller/mainController.js', 'utf8', function(err, contents) {	
 			res.end(contents);
 		});
@@ -179,7 +187,7 @@ function routePath(req, res, pathName){
 	
 	//Images
 	else if (pathName == '/del.png') {
-		 var img = fs.readFileSync('./Images/del.png');
+		var img = fs.readFileSync('./Images/del.png');
 	     res.writeHead(200, {'Content-Type': 'image/gif' });
 	     res.end(img, 'binary');
 	}
@@ -187,13 +195,11 @@ function routePath(req, res, pathName){
 	//Default Path
 	else{
 		if(pathName !=""){
-			//console.log("Path is "+pathName);
+			res.writeHead(404, {"Content-Type": "text/html"});
 			fs.readFile('.'+pathName, 'utf8', function(err, contents) {
 				res.end(contents);
 			});
 		}
-		//res.writeHead(404, {"Content-Type": "text/plain"});
-		//res.end("Page Not Found");
 	}
 }
 console.log("Server Running...");
