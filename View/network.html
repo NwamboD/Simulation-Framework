@@ -7,7 +7,9 @@
 		<script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
 		<link rel="stylesheet" href="style.css">
 		
-		<script src="main.js"></script>
+		 <script src="mainController.js"></script>
+		<!-- <script src="./Controller/mainController.js"></script> -->
+		
 	</head>
 	<body>
 		<div id="container">
@@ -22,17 +24,29 @@
 						<li><a href="index.html">Home</a></li>
 						<li><a class="selected" href="network.html">Network</a></li>
 						<li><a href="device.html">Device</a></li>
-						<li><a href="#">Logs</a></li>
+						<li><a href="networkdevices.html">Network Devices</a></li>
+						<li><a href="application.html">Application</a></li>
 					</ul>	
 				</div>
 				
 				<div id="main">
 					<h2>Network page</h2>
 					 
-					 <div id="dialog-form" title="Create new user">
+					<div id="dialog-form" title="Networks">
  
+ 					   <!-- CREATE NETWORK FORM -->
 					  <form id="createNetworkForm" class="dialog">
 						<fieldset>
+						<center><b> Create Network </b> </center>
+						<br/><br/>
+						
+						  <label for="name">Network Type</label>
+						  <select name="networktype" id="networktype"  class="text ui-widget-content ui-corner-all">
+						  		<option value="Cellular">Cellular</option>
+						  		<option value="Gsm">Gsm</option>
+						  		<option value="Wifi">Wifi</option>
+						  </select>
+						  <br/><br/>
 						  <label for="name">Network Name</label>
 						  <input type="text" name="networkname" id="networkname"  class="text ui-widget-content ui-corner-all">
 					 
@@ -40,32 +54,37 @@
 						  <input type="submit" tabindex="-1" style="position:absolute; top:-1000px">
 						</fieldset>
 					  </form>
+					  
+					  
+					  <form id="disconnectNetworkForm" class="dialog">
+						<fieldset>
+						<center><b> Disconnect Network </b> </center>
+						<br/><br/>
+						   <div id="deletenetwork-table">
+					  
+					  	   </div>
+					 
+						  <!-- Allow form submission with keyboard without duplicating the dialog button -->
+						  <input type="submit" tabindex="-1" style="position:absolute; top:-1000px">
+						</fieldset>
+					  </form>
+					  
+					  
 					</div>
 					 
 					 <p></p>
 					<div id="users-contain" class="ui-widget">
 					  <h4>Existing Networks:</h4>
-					  <table id="users" class="ui-widget ui-widget-content">
-						<thead>
-						  <tr class="ui-widget-header ">
-							<th>Network Id</th>
-							<th>Network Name</th>
-							<th>Joined Id</th>
-						  </tr>
-						</thead>
-						<tbody>
-						  <tr>
-							<td>John Doe</td>
-							<td>john.doe@example.com</td>
-							<td>johndoe1</td>
-						  </tr>
-						</tbody>
-					  </table>
+					  <div id="network-table">
+					  
+					  </div>
+					  
+					 
 					</div>
-				  
-					<button id="createNetworkDialog" class="btn"> Create a Network </button>
-					<button class="btn"> Join Network </button>
-					<button class="btn"> Un-Join Network </button>
+					
+					<button id="createNetworkDialog" class="btn" > Create a Network </button>
+					<button id="connectNetworkDiaglog" class="btn" > Connect a Network </button>
+					<button id="disconnectNetworkDiaglog" class="btn"> Disconnect a Network </button>
 					<p> </p>
 					</div>
 

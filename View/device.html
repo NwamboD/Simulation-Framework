@@ -2,6 +2,14 @@
 	<head>
 		<title> Eventual Consistency </title>
 		<link rel="stylesheet" type="text/css" href="style.css" />
+		
+		<link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
+		<script src="//code.jquery.com/jquery-1.10.2.js"></script>
+		<script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
+		<link rel="stylesheet" href="style.css">
+		
+		 <script src="mainController.js"></script>
+		 
 	</head>
 	<body>
 		<div id="container">
@@ -16,14 +24,89 @@
 						<li><a href="index.html">Home</a></li>
 						<li><a href="network.html">Network</a></li>
 						<li><a class="selected" href="device.html">Device</a></li>
-						<li><a href="#">Logs</a></li>
+						<li><a href="networkdevices.html">Network Devices</a></li>
+						<li><a href="application.html">Application</a></li>
 					</ul>	
 				</div>
 				
 				<div id="main">
 					<h2>Device page</h2>
-					<button class="btn"> Add Device </button>
-					<button class="btn"> Remove Device </button>
+					
+					
+					 <!-- ADD DEVICE FORM -->
+					  <form id="addDeviceForm" class="dialog">
+						<fieldset>
+						<center><b> Add a New Device </b> </center>
+						<br/><br/><br/>
+						  <div class="network-names">
+						 </div>
+						 
+						 <br/>
+						 <label for="name">Device Type</label>
+						  <select name="devicetype" id="devicetype"  class="text ui-widget-content ui-corner-all">
+						  		<option value="Smart-Phone">Smart Phone</option>
+						  		<option value="Tablet">Tablet</option>
+						  		<option value="Pc">PC</option>
+						  </select>
+						<br/>
+						<br/>
+						  <label for="name">Device Name</label>
+						  <input type="text" name="devicename" id="devicename"  class="text ui-widget-content ui-corner-all">
+						  
+						  <label for="name">Device Memory</label>
+						  <input type="text" name="devicememory" id="devicememory"  class="text ui-widget-content ui-corner-all">
+					 
+						  <!-- Allow form submission with keyboard without duplicating the dialog button -->
+						  <input type="submit" tabindex="-1" style="position:absolute; top:-1000px">
+						</fieldset>
+					  </form>
+					
+					
+					
+					<form id="joinNetworkForm" class="dialog">
+						<fieldset>
+						
+						<center><b> Join Network </b> </center>
+						<br/><br/>
+						
+						  <label for="name">Network Name</label>
+						  
+						 <div class="network-name">
+						 </div>
+						 
+						  <!-- Allow form submission with keyboard without duplicating the dialog button -->
+						  <input type="submit" tabindex="-1" style="position:absolute; top:-1000px">
+						</fieldset>
+					  </form>
+					
+					
+					
+					<form id="unJoinNetworkForm" class="dialog">
+						<fieldset>
+						 
+						  <center><b> UN-Join Network </b> </center>
+						<br/><br/>
+						 <div id="connectednetworkdevices-names">
+						 </div>
+						 
+						  <!-- Allow form submission with keyboard without duplicating the dialog button -->
+						  <input type="submit" tabindex="-1" style="position:absolute; top:-1000px">
+						</fieldset>
+					 </form>
+					  
+					  
+					<p></p>
+					<div id="users-contain" class="ui-widget">
+					  <h4>Existing Devices:</h4>
+					  <div id="device-table">
+					  
+					  </div>
+				    </div>
+					  
+					<button id="addDeviceDialog" class="btn"> Add Device </button>
+					<button id="removeDeviceDiaglog" class="btn"> Remove Device </button>
+					<button id="joinNetworkDiaglog" class="btn"> Join a Network </button>
+					<button id="unJoinNetworkDiaglog" class="btn"> Unjoin a Network </button>
 					<p> </p>
 
 				</div>
@@ -36,7 +119,7 @@
 		
 		</div>
 	</body>
-</html
+</html>
 
 
 

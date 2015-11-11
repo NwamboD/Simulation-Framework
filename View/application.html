@@ -1,0 +1,105 @@
+<html>
+	<head>
+		<title> Eventual Consistency </title>
+		<link rel="stylesheet" type="text/css" href="style.css" />
+		<link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
+		<script src="//code.jquery.com/jquery-1.10.2.js"></script>
+		<script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
+		<link rel="stylesheet" href="style.css">
+		
+		 <script src="mainController.js"></script>
+		<!-- <script src="./Controller/mainController.js"></script> -->
+		
+	</head>
+	<body>
+		<div id="container">
+			<div id="header">
+				<h1> Simulation Framework for Eventual Consistency </h1>
+			</div>
+			
+			<div id="content"> 
+				<div id="nav">
+					<h3> Navigation </h3>
+					<ul>
+						<li><a href="index.html">Home</a></li>
+						<li><a href="network.html">Network</a></li>
+						<li><a href="device.html">Device</a></li>
+						<li><a href="networkdevices.html">Network Devices</a></li>
+						<li><a class="selected" href="application.html">Application</a></li>
+					</ul>	
+				</div>
+				
+				<div id="main">
+					<h2>Application page</h2>
+					 
+					 
+					 
+					 	<p></p>
+					<div id="users-contain" class="ui-widget">
+					  <h4>Connected Network Devices:</h4>
+					  <div id="application-devices">
+					  
+					  </div>
+				    </div>
+					  
+					  
+					  
+					<div id="dialog-form" title="Application">
+ 
+ 					   <!-- REGISTER APPLICATION FORM -->
+					  <form id="registerApplicationForm" class="dialog">
+						<fieldset>
+						<center><b> Register Application </b> </center>
+						<br/><br/><br/>
+						 <br/>
+						  <label for="name">Application Name</label>
+						  <input type="text" name="applicationname" id="applicationname"  class="text ui-widget-content ui-corner-all">
+						  
+						  <label for="name">Application Description</label>
+						  <textarea name="applicationdescription" id="applicationdescription"  rows="5" cols="40" class="text ui-widget-content ui-corner-all"></textarea>
+						  <br/><br/>
+						  <label for="name">Application URL</label>
+						  <input type="text" name="applicationurl" id="applicationurl"  class="text ui-widget-content ui-corner-all">
+					 
+						  <!-- Allow form submission with keyboard without duplicating the dialog button -->
+						  <input type="submit" tabindex="-1" style="position:absolute; top:-1000px">
+						</fieldset>
+					  </form>
+					  
+					  <!-- ADD DEVICE FORM -->
+					  <form id="installApplicationForm" class="dialog">
+						<fieldset>
+						<center><b> Install an Application on a Device </b> </center>
+						<br/><br/><br/>
+						  <div id="device-names">
+						 </div>
+						 
+						 <br/>
+						 
+						  <div id="application-names">
+						 </div>
+						 
+					  </form>
+					 
+					</div>
+					 
+					 <p></p>
+					<div id="users-contain" class="ui-widget">
+	
+					</div>
+					
+					<button id="registerApplicationDialog" class="btn" > Create an Application </button>
+					<button id="installApplicationDialog" class="btn" > Install an Application </button>
+				
+					<p> </p>
+					</div>
+
+			</div>
+			
+			<div id="footer">
+				Copyright &copy; 2015 Darlington Nwambo
+			</div>
+		
+		</div>
+	</body>
+</html>

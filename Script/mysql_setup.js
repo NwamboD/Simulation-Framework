@@ -1,3 +1,4 @@
+var exports = module.exports = {}; 
 
 //Step-1 - Import mysql module
 var mysql = require('mysql');
@@ -14,16 +15,78 @@ var conn = mysql.createConnection({
 });
 
 conn.connect();
+exports.openConnection = function(){
+	conn.connect();
+}
 
-//Step-3 - Test Connection
-var queryString = "Select * from user";
+exports.getConnectionObject = function(){
+	return conn;
+}
 
-conn.query(queryString, function(error, results){
-	if(error)
-		throw error;
-	else {
-		console.log(results);
-	}
-})
+exports.queryDatabase = function(queryString){
+	
+	conn.query(queryString, function(error, results){
+		if(error)
+			throw error;
+		else {
+			return results;
+		}
+		return false;
+	})
+}
 
-conn.end();
+exports.retrieveRecord = function(queryString){
+	
+	conn.query(queryString, function(error, results){
+		if(error)
+			throw error;
+		else {
+			return results;
+		}
+		return false;
+	})
+}	
+
+exports.deleteRecord = function(queryString){
+	
+	conn.query(queryString, function(error, results){
+		if(error)
+			throw error;
+		else {
+			return results;
+		}
+		return false;
+	})
+}	
+
+exports.insertRecord = function(queryString, tableName){
+	
+	conn.query(queryString, tableName, function(error, results){
+		if(error)
+			throw error;
+		else {
+			//console.log("The list of Networks are: "+ results['networkName'] );
+			return results;
+		}
+		return false;
+	})
+}	
+
+exports.closeConnection = function(){
+	conn.end();
+}
+
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	

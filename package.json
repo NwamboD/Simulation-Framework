@@ -6,7 +6,8 @@
   "dependencies": {
     "connect": "^2.30.2",
 	"jade":"*",
-	"stylus":"*"
+	"stylus":"*",
+	"async":"*"
 
   },
   "devDependencies": {},
