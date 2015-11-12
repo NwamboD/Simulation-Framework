@@ -159,6 +159,12 @@ function routePath(req, res, pathName){
 		else if(reqData.action && reqData.action == "getApplicationNames" ) {
 			Application.getApplicationNames(res, reqData);
 		}
+		else if(reqData.action && reqData.action == "getInstalledDeviceNames" ) {
+			Application.getInstalledDeviceNames(res, reqData);
+		}
+		else if(reqData.action && reqData.action == "getInstalledApplicationNames" ) {
+			Application.getInstalledApplicationNames(res, reqData);
+		}
 		else if(reqData.action && reqData.action == "installApplication" ) {
 			Application.installApplication(res, reqData);
 		}

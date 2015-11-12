@@ -257,8 +257,8 @@ exports.getApplicationNames = function(res, formdata){
 				for (var i in results) {
 					var applicationId = results[i]['applicationId'];
 			        var applicationName = results[i]['applicationName']; 
+			        
 			        combobox += "<option id='"+ applicationId +"' value='"+ applicationName +"'>"+ applicationName +"</option>";
-			        //combobox += "<input type='hidden' id='myhidden' value='"+ applicationId +"'></option>";
 			    }
 				return doneCallback(null);
 			}
@@ -266,6 +266,89 @@ exports.getApplicationNames = function(res, formdata){
 	};
 	//http://javascriptplayground.com/blog/2013/06/think-async/
 	async.each(sql, buildApplicationComboBox, function (err) {
+		combobox += "</select>";
+		res.end(combobox);
+	});
+}
+
+
+exports.getInstalledDeviceNames = function(res, formdata){
+	
+	conn = databaseConnection.getConnectionObject();
+	
+	var sql = formdata['query']; //All device id to be removed
+	var combobox = "<select id='installeddevice-name'>";
+
+	var buildInstalledDeviceNameComboBox = function (sql, doneCallback, test) {
+
+		var sql = "Select * from applicationobject";
+		conn.query(sql, function(error, results,fields){
+			if(error)
+				throw error;
+			else {
+				for (var i in results) {
+					var applicationId = results[i]['applicationId'];
+			        var deviceName = results[i]['deviceName']; 
+			        combobox += "<option id='"+ applicationId +"' value='"+ deviceName +"'>"+ deviceName +"</option>";
+			        //combobox += "<input type='hidden' id='myhidden' value='"+ applicationId +"'></option>";
+			    }
+				return doneCallback(null);
+			}
+		});
+	};
+	//http://javascriptplayground.com/blog/2013/06/think-async/
+	async.each(sql, buildInstalledDeviceNameComboBox, function (err) {
+		combobox += "</select>";
+		res.end(combobox);
+	});
+}
+
+
+exports.getInstalledApplicationNames = function(res, formdata){
+	
+	conn = databaseConnection.getConnectionObject();
+	
+	var sql = formdata['query']; //All device id to be removed
+	var combobox = "<select id='installedapplication-name'>";
+
+	var arr = [];
+	var applicationChecker = false;
+	
+	var buildInstalledApplicationComboBox = function (sql, doneCallback, test) {
+
+		var sql = "Select * from applicationobject";
+		conn.query(sql, function(error, results,fields){
+			if(error)
+				throw error;
+			else {
+				
+				for (var i in results) {
+					var applicationId = results[i]['applicationId'];
+			        var applicationName = results[i]['applicationName']; 
+			        
+			        for (var j=-1;j<arr.length;j++) {
+			     
+			        	  if(arr[j] != applicationName){
+			        		 
+			        		  applicationChecker = true;
+			        		  arr[j] = applicationName;
+			        	  }else{
+			        		  applicationChecker = false;
+			        		  break;
+			        	  }
+			        }
+			        if(applicationChecker ==true){
+			        	 combobox += "<option id='"+ applicationId +"' value='"+ applicationName +"'>"+ applicationName +"</option>";
+			        }
+			        applicationChecker = false;
+			        
+			    }
+				return doneCallback(null);
+			}
+		});
+	};
+	//http://javascriptplayground.com/blog/2013/06/think-async/
+	async.each(sql, buildInstalledApplicationComboBox, function (err) {
 		combobox += "</select>";
 		res.end(combobox);
 	});
@@ -397,7 +480,13 @@ exports.IncrementCounterByOne = function(res, formdata) {
 
 	conn = databaseConnection.getConnectionObject();
 	
-	var queryString = "SELECT * from applicationobject";
+	var installedDeviceName = formdata['installedDeviceName'];
+	var installedApplicationName = formdata['installedApplicationName'];
+	
+	//console.log(installedDeviceName);
+	//console.log(installedApplicationName);
+	
+	var queryString = "SELECT * from applicationobject where deviceName= '" + installedDeviceName + "' AND applicationName='"+ installedApplicationName + "'";;
 	
 	conn.query(queryString, function(error, results,fields){
 		
@@ -416,11 +505,11 @@ exports.IncrementCounterByOne = function(res, formdata) {
 					var application = require("../Apps/"+applicationName+'.js');
 					var newApplicationObject = new application(applicationObject);
 					
-					console.log(deviceName +" OLD COUNTER = :"+ newApplicationObject.getLocalCounter());
+					console.log(deviceName +" :OLD COUNTER = "+ newApplicationObject.getLocalCounter());
 					newApplicationObject.addOne();
 					
-					console.log(deviceName + " ADD ONE Local Counter = :"+ newApplicationObject.getLocalCounter());
-					res.end(deviceName + " ADD ONE Local Counter = :"+ newApplicationObject.getLocalCounter());
+					console.log(deviceName + " New Counter = :"+ newApplicationObject.getLocalCounter());
+					res.end(deviceName + " :New Counter = "+ newApplicationObject.getLocalCounter());
 					
 					newApplicationObject = JSON.stringify(newApplicationObject);
 					var queryString = "UPDATE applicationobject SET applicationobject= '" + newApplicationObject + "' where deviceName= '" + deviceName + "'";
@@ -432,7 +521,6 @@ exports.IncrementCounterByOne = function(res, formdata) {
 		    }
 		}
 	});
-
 }
 
 

@@ -9,7 +9,8 @@
 		joinNetwork: '',
 		unJoinNetwork: '',
 		registerApplication: '',
-		installApplication: ''
+		installApplication: '',
+		runApplication: ''
 	};
 	
 	//When the document finish loading
@@ -344,7 +345,32 @@
 		    });
 			
 			
+			// When Run Application
+			$("#runApplicationDialog").click(function(){
+				
+				getInstalledDeviceNames();
+				getInstalledApplicationNames();
+				
+				dialogs.runApplication.dialog('open');			
+			});
 			
+			dialogs.runApplication = $( "#runApplicationForm" ).dialog({
+		      autoOpen:false,
+		      modal:true,
+			  height: 280,
+		      width: 400,
+		      buttons: {
+		        Run_Application: function(){
+		        	IncrementCounterByOne();
+		        },
+		        Cancel: function() {
+		        	dialogs.runApplication.dialog( "close" );
+		        }
+		      },
+		      close: function() {
+		    	  dialogs.runApplication.dialog( "close" );
+		      }
+		    });
 			
 			
 			
@@ -772,7 +798,7 @@
 				}
 			});
 	}
-
+	
 	//Get the Application Names
 	function getApplicationNames(){
 		
@@ -793,6 +819,54 @@
 			},
 			success: function(response){
 				$("#application-names").html(response);
+			}
+		});
+	}
+	
+	//Get the Installed Device Names
+	function getInstalledDeviceNames(){
+		
+		var data = [];
+		var sql="Select * from applicationobject";
+		data[0] = sql;
+		var myFormdata = {
+			action: "getInstalledDeviceNames",
+			query: data
+		};
+		$.ajax({
+			type: 'post',
+			url:  '/Application.js',
+			data: { data: JSON.stringify(myFormdata) },
+			dataType: 'html',
+			error: function(jqXHR, exception){
+				console.log("Some ERROR : "+exception);
+			},
+			success: function(response){
+				$("#installeddevice-names").html(response);
+			}
+		});
+	}
+	
+	//Get the Installed Application Names
+	function getInstalledApplicationNames(){
+		
+		var data = [];
+		var sql="Select * from application";
+		data[0] = sql;
+		var myFormdata = {
+			action: "getInstalledApplicationNames",
+			query: data
+		};
+		$.ajax({
+			type: 'post',
+			url:  '/Application.js',
+			data: { data: JSON.stringify(myFormdata) },
+			dataType: 'html',
+			error: function(jqXHR, exception){
+				console.log("Some ERROR : "+exception);
+			},
+			success: function(response){
+				$("#installedapplication-names").html(response);
 			}
 		});
 	}
@@ -829,10 +903,8 @@
 	function installApplication() {		
 		
 		//get user input values
-		//var deviceId = $("#myhiddenDeviceId").val();
 		var deviceName = $("#device-name").val();
 		
-		//var applicationId = $("#myhidden").val();
 		var applicationName = $("#application-name").val();
 		//alert(applicationName);
 		var myFormData = {
@@ -864,21 +936,22 @@
 	function IncrementCounterByOne(){
 		
 		var myFormdata = {
-				action: "IncrementCounterByOne"
-			};
-			
-			$.ajax({
-				type: 'post',
-				url: '/Application.js',
-				data: { data: JSON.stringify(myFormdata) },
-				dataType: 'html',
-				error: function(jqXHR, exception){
-					console.log("Some ERROR : "+exception);
-				},
-				success: function(response){
-					alert(response);
-				}
-			});
+				action: "IncrementCounterByOne",
+				installedDeviceName: $("#installeddevice-name").val(),
+				installedApplicationName: $("#installedapplication-name").val(),
+		};
+		$.ajax({
+			type: 'post',
+			url: '/Application.js',
+			data: { data: JSON.stringify(myFormdata) },
+			dataType: 'html',
+			error: function(jqXHR, exception){
+				console.log("Some ERROR : "+exception);
+			},
+			success: function(response){
+				alert(response);
+			}
+		});
 	}
 	
 	
