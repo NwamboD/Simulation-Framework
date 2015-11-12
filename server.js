@@ -162,6 +162,9 @@ function routePath(req, res, pathName){
 		else if(reqData.action && reqData.action == "installApplication" ) {
 			Application.installApplication(res, reqData);
 		}
+		else if(reqData.action && reqData.action == "IncrementCounterByOne" ) {
+			Application.IncrementCounterByOne(res, reqData);
+		}
 		else {
 			console.log("ERROR: APPLICATION Action Not Defined");
 		}

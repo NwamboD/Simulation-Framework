@@ -234,7 +234,6 @@ exports.registerApplication = function(res, formdata) {
 	});
 	
 	if(loopChecker ==true){
-		console.log("STILL CAME IN");
 		res.end(applicationName +":  Application Registered");
 	}
 	
@@ -329,7 +328,6 @@ exports.browseApplication = function(res, formdata) {
 
 	conn = databaseConnection.getConnectionObject();
 	
-	//var sql2 = "Select * from applicationsignaturedescription where applicationName='" + applicationName + "'";
 	var queryString = "SELECT * from applicationsignaturedescription";
 	
 	var table = "<table width='100%'><tr><th>Application Name</th><th>Application Signature</th><th>Signature Description</th></tr>";
@@ -369,28 +367,18 @@ exports.browseApplication = function(res, formdata) {
 
 exports.installApplication = function(res, formdata) {
 
-	
 	var deviceName = formdata['devicename'];
-	//var applicationId = formdata['applicationId'];
 	var applicationName = formdata['applicationName'];
 	
 	var application = require("../Apps/"+applicationName+'.js');
 	
-	var applicationObject = new application();
+	var applicationObject = new application(applicationName);
 	
-	//console.log("APP ID IS " + applicationId);
-	//var functionObjects = applicationObject.getArrayOfJSONFunctionObjects();
-	//for(var i=0; i<functionObjects.length;i++){ //functionObjects.length
-		//console.log(functionObjects[i]['signature']);
-		//console.log(functionObjects[i]['description']);
-	//}
+	//console.log("BEFORE---- Application Object is :"+ applicationObject.getApplicationDescription());
+	//applicationObject.getApplicationDescription = ''+applicationObject.getApplicationDescription;
 	
-	var runResult = applicationObject.run();
+	var myObjectSerialized = JSON.stringify(applicationObject);
 
-	
-	var myObjectSerialized = JSON.stringify(runResult);
-	
-	
 	var applicationObject = {
 			deviceName: deviceName,
 			applicationName: applicationName,
@@ -400,19 +388,52 @@ exports.installApplication = function(res, formdata) {
 	var queryString = 'INSERT INTO applicationObject set ?';
 	var result = databaseConnection.insertRecord(queryString, applicationObject);
 
-	//console.log("INSTALLING APPLICATION "+ runResult);
-	
-	
-	//var myObjectSerialized = JSON.parse(runResult);
-	
-	//console.log("RETRIEVING APPLICATION "+ runResult);
-	//console.log("FINISHED");
-	res.end(deviceName +"  :installed "+ applicationName + ":  Application");
-	
+	res.end(deviceName +"  :installed "+ applicationName + ":  Application");	
 	
 }
 
 
+exports.IncrementCounterByOne = function(res, formdata) {
+
+	conn = databaseConnection.getConnectionObject();
+	
+	var queryString = "SELECT * from applicationobject";
+	
+	conn.query(queryString, function(error, results,fields){
+		
+		if(error)
+			throw error;
+		else {
+			for (var i in results) {
+				var deviceName = results[i]['deviceName']; 
+				var applicationName = results[i]['applicationName']; 
+				var applicationObject = results[i]['applicationObject']; 
+				
+				applicationObject = JSON.parse(applicationObject);
+
+				if(typeof applicationObject === 'object'){
+					
+					var application = require("../Apps/"+applicationName+'.js');
+					var newApplicationObject = new application(applicationObject);
+					
+					console.log(deviceName +" OLD COUNTER = :"+ newApplicationObject.getLocalCounter());
+					newApplicationObject.addOne();
+					
+					console.log(deviceName + " ADD ONE Local Counter = :"+ newApplicationObject.getLocalCounter());
+					res.end(deviceName + " ADD ONE Local Counter = :"+ newApplicationObject.getLocalCounter());
+					
+					newApplicationObject = JSON.stringify(newApplicationObject);
+					var queryString = "UPDATE applicationobject SET applicationobject= '" + newApplicationObject + "' where deviceName= '" + deviceName + "'";
+					var result = databaseConnection.queryDatabase(queryString);
+					
+				}else{
+					console.log("NOT AN OBJECT ");
+				}
+		    }
+		}
+	});
+
+}
 
 
 

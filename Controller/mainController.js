@@ -17,9 +17,9 @@
 		
 		//RUN APPLICATION
 		
-		  $("form").submit(function(){
-		        alert("Submitted");
-		    });
+		  	$("#addOne").click(function(){
+		  		IncrementCounterByOne();
+		  	});
 		  
 			// Get the path and load existing data if any
 			var path = window.location.pathname;
@@ -860,7 +860,26 @@
 		
 	}
 	
-	
+	//Browse Application
+	function IncrementCounterByOne(){
+		
+		var myFormdata = {
+				action: "IncrementCounterByOne"
+			};
+			
+			$.ajax({
+				type: 'post',
+				url: '/Application.js',
+				data: { data: JSON.stringify(myFormdata) },
+				dataType: 'html',
+				error: function(jqXHR, exception){
+					console.log("Some ERROR : "+exception);
+				},
+				success: function(response){
+					alert(response);
+				}
+			});
+	}
 	
 	
 	

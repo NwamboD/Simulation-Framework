@@ -1,7 +1,14 @@
 
-function IntegerIncrement(){
+function IntegerIncrement(IntegerIncrement){
+	
 	//properties/fields
-	localCounter = 7;
+	//this.localCounter = IntegerIncrement.localCounter;
+	
+	if(IntegerIncrement.localCounter == undefined){
+		this.localCounter = 0;
+	} else{
+		this.localCounter = IntegerIncrement.localCounter;
+	}
 	
 	RDT = [
                {
@@ -26,11 +33,11 @@ IntegerIncrement.prototype.getRDTInfo = function() {
 };
 
 IntegerIncrement.prototype.addOne = function (){
-	localCounter++;
+	this.localCounter++;
 }
 
 IntegerIncrement.prototype.getLocalCounter = function (){
-	return localCounter;
+	return this.localCounter;
 }
 
 IntegerIncrement.prototype.getGlobalCounter = function (){	
@@ -81,15 +88,7 @@ IntegerIncrement.prototype.getExecutableApplicationMethods = function (){
 	return array_of_functions;
 }
 
-
-IntegerIncrement.prototype.run = function (){
-	
-	return localCounter;
-}
-
+//var IC = new IntegerIncrement();
+//IC.addOne();
+//console.log("Local Counter is "+ IC.getLocalCounter());
 module.exports = IntegerIncrement;
-// 	4. Every method in the application must have a get_methodName_Description. Where method name is replaced with the name of the method
-
-
-
-
