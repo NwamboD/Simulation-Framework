@@ -374,24 +374,6 @@ exports.browseApplications = function(res, formdata) {
 				table += "<td>"+deviceName+"</td>";
 				table += "<td>"+ applicationName +"</td>";
 
-				/*
-				var sql2 = "Select * from applicationsignaturedescription where applicationName='" + applicationName + "'";
-				conn.query(sql2, function(error, results2,fields){
-					if(error)
-						throw error;
-					else {
-						for (var j in results2) {
-
-							var applicationSignature = results2[j]['applicationSignature']; 
-					        var applicationDescription = results2[j]['applicationDescription']; 
-					        console.log(applicationSignature);
-					        table += "<td>"+ applicationSignature +"</td>";
-					       
-					    }
-					}
-				});
-				*/
-				
 				table += "<td><input type=submit value='Run' id='run'></td>";
 				//table += "<td><button id='"+ deviceName + "'>Run</button></td>";
 				table += "</tr>";
@@ -457,8 +439,9 @@ exports.installApplication = function(res, formdata) {
 	
 	var applicationObject = new application(applicationName);
 	
-	//console.log("BEFORE---- Application Object is :"+ applicationObject.getApplicationDescription());
-	//applicationObject.getApplicationDescription = ''+applicationObject.getApplicationDescription;
+	//var RDTs = applicationObject.getRDTs();
+	//var rdtName = RDTs[0]['name'];	//Would have to edit this part to handle many RDTs
+	//var rdt = require("../Rdts/"+rdtName+'.js');
 	
 	var myObjectSerialized = JSON.stringify(applicationObject);
 
@@ -482,9 +465,6 @@ exports.IncrementCounterByOne = function(res, formdata) {
 	
 	var installedDeviceName = formdata['installedDeviceName'];
 	var installedApplicationName = formdata['installedApplicationName'];
-	
-	//console.log(installedDeviceName);
-	//console.log(installedApplicationName);
 	
 	var queryString = "SELECT * from applicationobject where deviceName= '" + installedDeviceName + "' AND applicationName='"+ installedApplicationName + "'";;
 	

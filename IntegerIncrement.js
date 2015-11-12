@@ -9,12 +9,11 @@ function IntegerIncrement(IntegerIncrement){
 	}
 	
 	RDT = [
-               {
-               	name: 'IntegerIncrement',
-               	description: 'The IntegerIncrement RDT returns summation of local counter for all devices'
-               }
-               	
-          ];
+           {
+           	name: 'IntegerIncrement',
+           	description: 'The IntegerIncrement RDT returns summation of local counter for all devices'
+           }    	
+    ];
 }
 
 IntegerIncrement.prototype.getApplicationDescription = function (){

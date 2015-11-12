@@ -1,6 +1,8 @@
 
 function IntegerIncrement(IntegerIncrement){
 	
+	//integerIncrementRDTObject = new IntegerIncrementRDT();
+	
 	//properties/fields
 	//this.localCounter = IntegerIncrement.localCounter;
 	
@@ -12,7 +14,7 @@ function IntegerIncrement(IntegerIncrement){
 	
 	RDT = [
                {
-               	name: 'IntegerIncrement',
+               	name: 'IntegerIncrementRDT',
                	description: 'The IntegerIncrement RDT returns summation of local counter for all devices'
                }
                	
@@ -26,7 +28,7 @@ IntegerIncrement.prototype.getApplicationDescription = function (){
 	return description;
 }
 
-IntegerIncrement.prototype.getRDTInfo = function() {
+IntegerIncrement.prototype.getRDTs = function() {
 	
 	return RDT;
 	//return "This Application uses the IntegerIncrement Replicated Data Type";
