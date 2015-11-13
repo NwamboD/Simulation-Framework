@@ -436,26 +436,40 @@ exports.installApplication = function(res, formdata) {
 	var applicationName = formdata['applicationName'];
 	
 	var application = require("../Apps/"+applicationName+'.js');
-	
 	var applicationObject = new application(applicationName);
 	
-	//var RDTs = applicationObject.getRDTs();
-	//var rdtName = RDTs[0]['name'];	//Would have to edit this part to handle many RDTs
-	//var rdt = require("../Rdts/"+rdtName+'.js');
+	var RDTs = applicationObject.getRDTs();
 	
-	var myObjectSerialized = JSON.stringify(applicationObject);
+	for(var i=0; i<RDTs.length;i++){
+		
+		var rdtName = RDTs[i]['name'];
+		
+		try{
+			//console.log("RDT Name is: "+rdtName);
+			var rdt = require("../Rdts/"+rdtName+'.js');
+			
+			var rdtObject = new rdt();
 
-	var applicationObject = {
-			deviceName: deviceName,
-			applicationName: applicationName,
-			applicationObject: myObjectSerialized
-	};
-	
-	var queryString = 'INSERT INTO applicationObject set ?';
-	var result = databaseConnection.insertRecord(queryString, applicationObject);
-
-	res.end(deviceName +"  :installed "+ applicationName + ":  Application");	
-	
+			var myApplicationObjectSerialized = JSON.stringify(applicationObject);
+			var myRDTObjectSerialized = JSON.stringify(rdtObject);
+		
+			var applicationObject = {
+					deviceName: deviceName,
+					applicationName: applicationName,
+					applicationObject: myApplicationObjectSerialized,
+					rdtObject: myRDTObjectSerialized
+			};
+			
+			var queryString = 'INSERT INTO applicationObject set ?';
+			var result = databaseConnection.insertRecord(queryString, applicationObject);
+		
+			res.end(deviceName +"  :installed "+ applicationName + ":  Application");	
+			
+		}catch(e) {	
+			console.log(e);
+			//console.log(rdtName +" Has not yet been registered with the Simulation");
+		}
+	}
 }
 
 
@@ -474,37 +488,79 @@ exports.IncrementCounterByOne = function(res, formdata) {
 			throw error;
 		else {
 			for (var i in results) {
+				
 				var deviceName = results[i]['deviceName']; 
 				var applicationName = results[i]['applicationName']; 
 				var applicationObject = results[i]['applicationObject']; 
+				var rdtObject = results[i]['rdtObject'];
 				
+				//console.log("RDT counter here is "+rdtObject);
 				applicationObject = JSON.parse(applicationObject);
+				rdtObject = JSON.parse(rdtObject);
 
 				if(typeof applicationObject === 'object'){
 					
+					var rdtName = applicationObject.RDT[i]['name'];
+					//console.log("Application Object is "+ rdtName);
+					
 					var application = require("../Apps/"+applicationName+'.js');
-					var newApplicationObject = new application(applicationObject);
+					var newApplicationObject = new application(applicationObject);	//pass the serialized object with properties to the application so it doesn't lose its state
 					
-					console.log(deviceName +" :OLD COUNTER = "+ newApplicationObject.getLocalCounter());
-					newApplicationObject.addOne();
+					var rdt = require("../Rdts/"+rdtName+'.js');
+					var newRdtObject = new rdt(rdtObject);
 					
-					console.log(deviceName + " New Counter = :"+ newApplicationObject.getLocalCounter());
-					res.end(deviceName + " :New Counter = "+ newApplicationObject.getLocalCounter());
 					
-					newApplicationObject = JSON.stringify(newApplicationObject);
-					var queryString = "UPDATE applicationobject SET applicationobject= '" + newApplicationObject + "' where deviceName= '" + deviceName + "'";
+					//console.log(deviceName +" :OLD COUNTER = "+ newApplicationObject.getLocalCounter());
+					//newApplicationObject.addOne();	//localCounter
+					//console.log(deviceName + " New Counter = :"+ newApplicationObject.getLocalCounter());
+					//res.end(deviceName + " :New Counter = "+ newApplicationObject.getLocalCounter());
+					//newApplicationObject = JSON.stringify(newApplicationObject);
+					//var queryString = "UPDATE applicationobject SET applicationobject= '" + newApplicationObject + "' where deviceName= '" + deviceName + "'";
+					
+					console.log(deviceName +" :OLD COUNTER = "+ newRdtObject.getCounter());
+					newRdtObject.incrementCounter();	//globalCounter from RDT
+					console.log(deviceName + " New Counter = :"+ newRdtObject.getCounter());
+					res.end(deviceName + " :New Counter = "+ newRdtObject.getCounter());
+					newRdtObject = JSON.stringify(newRdtObject);
+					var queryString = "UPDATE applicationobject SET rdtobject= '" + newRdtObject + "' where deviceName= '" + deviceName + "'";
+					
+					
+					
+					//var queryString = "UPDATE applicationobject SET applicationobject= '" + newApplicationObject + "' AND rdtobject= '" + newRdtObject + "' where deviceName= '" + deviceName + "'";
 					var result = databaseConnection.queryDatabase(queryString);
-					
+
 				}else{
 					console.log("NOT AN OBJECT ");
 				}
+				
 		    }
 		}
 	});
+	
 }
 
 
 
+
+//SIMULATION SCRIPT
+exports.runSimulationScript = function(res, formdata) {
+
+	var deviceName = formdata['devicename'];
+	var applicationName = formdata['applicationName'];
+	
+	var application = require("../Apps/"+applicationName+'.js');
+	var applicationObject = new application(applicationName);
+	
+	var RDTs = applicationObject.getRDTs();
+	var rdtName = RDTs[0]['name'];	//Would have to edit this part to handle many RDTs
+	var rdt = require("../Rdts/"+rdtName+'.js');
+	var rdtObject = new rdt();
+	
+	//rdtObject.incrementCounter();
+	//console.log("RDT Counter is "+rdtObject.getCounter());
+	//console.log("RDTs used by the application is "+RDTs[0]['name'])
+	
+}
 
 
 
