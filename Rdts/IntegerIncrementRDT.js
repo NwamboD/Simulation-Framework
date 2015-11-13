@@ -1,13 +1,13 @@
 
-function IntegerIncrementRDT(){
+function IntegerIncrementRDT(IntegerIncrementRDT){
 	
 	//properties/fields
 	this.counter = 0;
-	/*if(IntegerIncrementRDT.localCounter == undefined){
+	if(IntegerIncrementRDT.counter == undefined){
 		this.counter = 0;
 	} else{
 		this.counter = IntegerIncrementRDT.counter;
-	}*/
+	}
 	
 }
 

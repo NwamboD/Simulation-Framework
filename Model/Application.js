@@ -448,8 +448,8 @@ exports.installApplication = function(res, formdata) {
 			//console.log("RDT Name is: "+rdtName);
 			var rdt = require("../Rdts/"+rdtName+'.js');
 			
-			var rdtObject = new rdt();
-
+			var rdtObject = new rdt(rdtName);
+			
 			var myApplicationObjectSerialized = JSON.stringify(applicationObject);
 			var myRDTObjectSerialized = JSON.stringify(rdtObject);
 		
@@ -469,14 +469,13 @@ exports.installApplication = function(res, formdata) {
 			console.log(e);
 			//console.log(rdtName +" Has not yet been registered with the Simulation");
 		}
+		
 	}
 }
 
 
 exports.IncrementCounterByOne = function(res, formdata) {
 
-	conn = databaseConnection.getConnectionObject();
-	
 	var installedDeviceName = formdata['installedDeviceName'];
 	var installedApplicationName = formdata['installedApplicationName'];
 	
@@ -511,22 +510,21 @@ exports.IncrementCounterByOne = function(res, formdata) {
 					
 					
 					//console.log(deviceName +" :OLD COUNTER = "+ newApplicationObject.getLocalCounter());
-					//newApplicationObject.addOne();	//localCounter
+					newApplicationObject.addOne();	//localCounter
 					//console.log(deviceName + " New Counter = :"+ newApplicationObject.getLocalCounter());
 					//res.end(deviceName + " :New Counter = "+ newApplicationObject.getLocalCounter());
-					//newApplicationObject = JSON.stringify(newApplicationObject);
+					newApplicationObject = JSON.stringify(newApplicationObject);
 					//var queryString = "UPDATE applicationobject SET applicationobject= '" + newApplicationObject + "' where deviceName= '" + deviceName + "'";
+					//var result = databaseConnection.queryDatabase(queryString);
 					
 					console.log(deviceName +" :OLD COUNTER = "+ newRdtObject.getCounter());
 					newRdtObject.incrementCounter();	//globalCounter from RDT
 					console.log(deviceName + " New Counter = :"+ newRdtObject.getCounter());
 					res.end(deviceName + " :New Counter = "+ newRdtObject.getCounter());
 					newRdtObject = JSON.stringify(newRdtObject);
-					var queryString = "UPDATE applicationobject SET rdtobject= '" + newRdtObject + "' where deviceName= '" + deviceName + "'";
+					//var queryString = "UPDATE applicationobject SET rdtobject= '" + newRdtObject + "' where deviceName= '" + deviceName + "'";
 					
-					
-					
-					//var queryString = "UPDATE applicationobject SET applicationobject= '" + newApplicationObject + "' AND rdtobject= '" + newRdtObject + "' where deviceName= '" + deviceName + "'";
+					var queryString = "UPDATE applicationobject SET applicationobject= '" + newApplicationObject + "',rdtobject= '" + newRdtObject + "' where deviceName= '" + deviceName + "'";
 					var result = databaseConnection.queryDatabase(queryString);
 
 				}else{
