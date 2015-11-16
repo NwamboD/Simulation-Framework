@@ -2,6 +2,13 @@
 	<head>
 		<title> Eventual Consistency </title>
 		<link rel="stylesheet" type="text/css" href="style.css" />
+		<link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
+		<script src="//code.jquery.com/jquery-1.10.2.js"></script>
+		<script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
+		<link rel="stylesheet" href="style.css">
+		
+		 <script src="mainController.js"></script>
+		<!-- <script src="./Controller/mainController.js"></script> -->
 	</head>
 	<body>
 		<div id="container">
@@ -32,6 +39,51 @@ applications to the mobile devices. </p>
 					<p> We are particularly interested in applications that utilize Replicated Data Types (RDTs), which will be provided by libraries created 
 outside the Framework. The Framework will allow us to test, benchmark and pragmatically evaluate the RDTs. Automatic execution of test scripts is another desired functionality.</p>
 
+
+					<!-- RUN SIMULATION FORM -->
+					  <form id="runSimulationForm" class="dialog">
+						<fieldset>
+						<center><b> Run Simulation </b> </center>
+						<br/><br/><br/>
+	
+						 <label class="runsimulation" for="simulationduration">
+					     	<span>Simulation Duration</span>
+					     	<input type="number" id="simulationduration" min="1" />
+					     </label>
+					     <label class="runsimulation" for="simulationdurationunit" >
+					     	<span> Input Unit</span><br/>
+					    	<select id='simulationdurationunit'>
+					    	<option value="seconds">----------</option>
+							  <option value="seconds">Seconds</option>
+							  <option value="minutes">Minutes</option>
+							  <option value="hours">Hours</option>
+							  <option value="days">Days</option>
+						 	</select>
+					  	</label>
+					  	<br/><br/><br/><br/>
+
+						<label class="runsimulation" for="appaccessfreq">
+					     	<span>Application Access Freq</span>
+					     	<input type="number" id="appaccessfreq" min="1" />
+					     </label>
+					     <label class="runsimulation" for="accessfrequnit" >
+					     	<span> Input Unit</span><br/>
+					    	<select id='accessfrequnit'>
+					    	<option value="seconds">----------</option>
+							  <option value="seconds">Seconds</option>
+							  <option value="minutes">Minutes</option>
+							  <option value="hours">Hours</option>
+							  <option value="days">Days</option>
+						 	</select>
+					  	</label>
+					  	
+					 
+						  <!-- Allow form submission with keyboard without duplicating the dialog button -->
+						  <input type="submit" tabindex="-1" style="position:absolute; top:-1000px">
+						</fieldset>
+					  </form>
+					  
+						<center><button id="runSimulationDialog" class="btn" > Run Simulation </button> <br/><br/></center>
 				</div>
 				
 			</div>
@@ -42,7 +94,7 @@ outside the Framework. The Framework will allow us to test, benchmark and pragma
 		
 		</div>
 	</body>
-</html
+</html>
 
 
 

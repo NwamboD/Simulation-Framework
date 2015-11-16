@@ -45,6 +45,17 @@ function routePath(req, res, pathName){
 			res.end(contents);
 		});	
 	}
+	//SIMULATION Paths
+	else if(pathName === '/Simulation.js'){
+		var Simulation = require("./Model/Simulation.js");
+		
+		if(reqData.action && reqData.action == "runSimulationScript" ) {
+			Simulation.runSimulationScript(res, reqData);
+		}
+		else {
+			console.log("ERROR: APPLICATION Action Not Defined");
+		}
+	}
 	
 	//Network Paths
 	else if(pathName === '/network.html'){

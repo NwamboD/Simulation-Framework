@@ -63,6 +63,7 @@ h1, h2, h3{
    text-align: right;
 }
 
+.runsimulation { width: 160px; float: left; margin: 0 20px 0 0; }
 
 body { font-size: 62.5%; }
 label, input { display:block; }

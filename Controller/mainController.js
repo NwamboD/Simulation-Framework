@@ -10,7 +10,8 @@
 		unJoinNetwork: '',
 		registerApplication: '',
 		installApplication: '',
-		runApplication: ''
+		runApplication: '',
+		runSimulation: ''
 	};
 	
 	//When the document finish loading
@@ -38,8 +39,37 @@
 			if( path == "/application.html" ) {
 				browseApplication();
 			}
-			/////////////////////////////////////// NETWORK DIAGLOGS /////////////////////////////////
 			
+			
+			/////////////////////////////////////// RUN SIMULATION /////////////////////////////////
+			
+			
+			// when run simulation is clicked
+			$("#runSimulationDialog").click(function(){
+				dialogs.runSimulation.dialog('open');			
+			});
+			dialogs.runSimulation = $( "#runSimulationForm" ).dialog({
+		      autoOpen:false,
+		      modal:true,
+			  height: 290,
+		      width: 400,
+		      buttons: {
+		        Simulate: function(){
+		        	
+		        	runSimulationScript();
+		        	
+		        },
+		        Cancel: function() {
+		        	dialogs.runSimulation.dialog( "close" );
+		        }
+		      },
+		      close: function() {
+		    	  dialogs.runSimulation.dialog( "close" );
+		      }
+		    });
+
+			
+			/////////////////////////////////////// NETWORK DIAGLOGS /////////////////////////////////
 			
 			// when create network is clicked
 			$("#createNetworkDialog").click(function(){
@@ -955,6 +985,35 @@
 	}
 	
 	
+	/////////// RUN SIMULATION
+	
+	//Browse Application
+	function runSimulationScript(){
+		
+		var simulationDuration = $("#simulationduration").val();
+    	var simulationDurationUnit = $('#simulationdurationunit :selected').text();
+    	
+    	//alert("Simulation Duration is "+simulationDuration);
+    	//alert("Simulation Unit is "+simulationDurationUnit);
+    	
+		var myFormdata = {
+				action: "runSimulationScript",
+				simulationDuration: simulationDuration,
+				simulationDurationUnit: simulationDurationUnit
+		};
+		$.ajax({
+			type: 'post',
+			url: '/Simulation.js',
+			data: { data: JSON.stringify(myFormdata) },
+			dataType: 'html',
+			error: function(jqXHR, exception){
+				console.log("Some ERROR : "+exception);
+			},
+			success: function(response){
+				alert(response);
+			}
+		});
+	}
 	
 	
 	
