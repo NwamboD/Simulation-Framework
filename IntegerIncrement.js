@@ -1,19 +1,25 @@
 
-function IntegerIncrement(IntegerIncrement){
+function IntegerIncrement(newObject){
+	
+	//integerIncrementRDTObject = new IntegerIncrementRDT();
 	
 	//properties/fields
-	if(IntegerIncrement.localCounter == undefined){
-		this.localCounter = 7;
+	//this.localCounter = IntegerIncrement.localCounter;
+
+	if(newObject.localCounter == undefined){
+		this.localCounter = 0;
 	} else{
-		this.localCounter = IntegerIncrement.localCounter;
+		this.localCounter = newObject.localCounter;
 	}
 	
-	RDT = [
-           {
-           	name: 'IntegerIncrement',
-           	description: 'The IntegerIncrement RDT returns summation of local counter for all devices'
-           }    	
-    ];
+	this.RDT = [
+               {
+               	name: 'IntegerIncrementRDT',
+               	description: 'The IntegerIncrement RDT returns summation of local counter for all devices'
+               }
+               	
+          ];
+     
 }
 
 IntegerIncrement.prototype.getApplicationDescription = function (){
@@ -23,9 +29,9 @@ IntegerIncrement.prototype.getApplicationDescription = function (){
 	return description;
 }
 
-IntegerIncrement.prototype.getRDTInfo = function() {
+IntegerIncrement.prototype.getRDTs = function() {
 	
-	return RDT;
+	return this.RDT;
 	//return "This Application uses the IntegerIncrement Replicated Data Type";
 };
 
@@ -52,7 +58,7 @@ IntegerIncrement.prototype.getArrayOfJSONFunctionObjects = function (){
    		{
    			signature: 'getRDTInfo()',
    			//description: 'This method returns the information of the RDTs that the application uses'
-   			description: RDT
+   			description: this.RDT
    		},
    		{
    			signature: 'addOne()',
