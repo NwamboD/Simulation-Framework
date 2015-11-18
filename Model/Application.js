@@ -200,6 +200,7 @@ exports.registerApplication = function(res, formdata) {
 		    						applicationName: applicationName,
 									applicationSignature: functionObjects[i]['signature'],
 									//applicationSignatureDescription: functionObjects[i]['description']
+									//serializing the object because RDTs are objects
 									applicationSignatureDescription: JSON.stringify(functionObjects[i]['description'])
 							};
 							
@@ -449,17 +450,19 @@ exports.installApplication = function(res, formdata) {
 	var applicationName = formdata['applicationName'];
 	
 	var application = require("../Apps/"+applicationName+'.js');
-	var applicationObject = new application(applicationName);
+	
+	//pass in application name to reinitialize new object with the properties of the old object
+	var applicationObject = new application(applicationName);	
 	
 	var RDTs = applicationObject.getRDTs();
-
+	
 	var functionObjects = applicationObject.getArrayOfJSONFunctionObjects();
 	//console.log("Executable Methods are "+ functionObjects);
 	
 	for(var i=0; i<RDTs.length;i++){
 		
 		var rdtName = RDTs[i]['name'];
-		
+
 		try{
 			//console.log("RDT Name is: "+rdtName);
 			var rdt = require("../Rdts/"+rdtName+'.js');
@@ -527,7 +530,6 @@ exports.IncrementCounterByOne = function(res, formdata) {
 					
 					var rdt = require("../Rdts/"+rdtName+'.js');
 					var newRdtObject = new rdt(rdtObject);
-					
 					
 					//console.log(deviceName +" :OLD COUNTER = "+ newApplicationObject.getLocalCounter());
 					newApplicationObject.addOne();	//localCounter

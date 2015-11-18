@@ -79,14 +79,14 @@ exports.runSimulationScript = function(res, formdata) {
 					
 					if(typeof applicationObject === 'object'){
 						
+						//console.log("RDT name "+ applicationObject.RDT[0].name);
+						var rdtName = applicationObject.RDT[0].name;
+						
 						//get all the signatures of the application
 						for(var i=0; i<applicationMethods.length;i++){ 
 							
 							applicationMethodArray[i] = applicationMethods[i]['signature'];
-							
-							//arrayOfObjectsMethods.push(applicationMethodArray[i]);
 							arrayOfObjectsMethods[i]=applicationMethodArray[i];
-							
 						}
 						
 						arrayOfObjectsMethodsFinal[applicationMethodArrayCounter] = arrayOfObjectsMethods;
@@ -94,6 +94,7 @@ exports.runSimulationScript = function(res, formdata) {
 						
 						//include the files of the applications and rdts
 						application = require("../Apps/"+applicationName+'.js');
+						rdt = require("../Rdts/"+rdtName+'.js');
 					}
 					
 					//store them in an array so we can randomize
@@ -123,7 +124,7 @@ exports.runSimulationScript = function(res, formdata) {
 		var fs = require("fs");
 
 		//create a log file based on current system time to store simulation
-		fs.writeFile(fileName+'.txt', 'Starting Simulation...\n\n', function (err) {
+		fs.writeFile('./Logs/'+fileName+'.txt', 'Starting Simulation...\n\n', function (err) {
 	      if (err) throw err;
 	    });
 		
@@ -135,6 +136,7 @@ exports.runSimulationScript = function(res, formdata) {
 		    	clearInterval(interval);
 		    }else{
 		    	var dbApplicationObject = '';
+		    	var dbRdtObject = '';
 		    	
 		    	//get random application object from array
 		    	var item = applicationObjectArray[Math.floor(Math.random()*applicationObjectArray.length)];
@@ -153,26 +155,29 @@ exports.runSimulationScript = function(res, formdata) {
 						else {
 							for (var i in results) {
 								dbApplicationObject = results[i]['applicationObject']; 
+								dbRdtObject = results[i]['rdtObject'];
 			    		    }
 							
-							dbApplicationObject = JSON.parse(dbApplicationObject); //serialize the dbApplicationObject
+							//unserialize database objects
+							dbApplicationObject = JSON.parse(dbApplicationObject);
+							dbRdtObject = JSON.parse(dbRdtObject); 
 							
 							return doneCallback(null);
 						}
 					});
 				};
 				
-				//For each of the device passed as an array, we call the deleteDevice function on each one and when we are done we call the doneCallback
 				async.each(arr2, retrieveObject, function (err) {
 					
 					
 					var newApplicationObject = new application(dbApplicationObject);	//pass the serialized object with properties to the application so it doesn't lose its state
+					var newRdtObject = new rdt(dbRdtObject);
 			    	
 			    	var selectedIndexLength = arrayOfObjectsMethodsFinal[index].length;	//gives you the length of the number of methods in that index 
 			    	
 			    	var indexOfRandomFunction = [Math.floor(Math.random() * (selectedIndexLength - 0) + 0)]; //get any random number between 0 and length of the array to execute
 
-			    	var methodItem = arrayOfObjectsMethodsFinal[index][indexOfRandomFunction];	//get the method at a given index
+			    	var methodItem = arrayOfObjectsMethodsFinal[index][indexOfRandomFunction];	//get a random method at a given index
 			    	
 			    	var extractedMethod = methodItem.substring(0, methodItem.length-2);	//extract the signature to take out () so you can call it as a function
 			    	
@@ -188,12 +193,16 @@ exports.runSimulationScript = function(res, formdata) {
 			    		fs.appendFile(fileName+'.txt', "Old Counter is "+  newApplicationObject["getLocalCounter"]() + "\n");
 			    		
 			    		newApplicationObject[extractedMethod]();
-			    		
+			    		newRdtObject.incrementCounter();
+			    			
 			    		console.log("New Counter : "+  newApplicationObject["getLocalCounter"]());
 			    		fs.appendFile(fileName+'.txt', "New Counter is "+  newApplicationObject["getLocalCounter"]() + "\n");
 			    		
+			    		
 			    		newApplicationObject = JSON.stringify(newApplicationObject);
-				    	var queryString = "UPDATE applicationobject SET applicationobject= '" + newApplicationObject + "' where deviceName= '" + deviceNameArray[index] + "'";
+			    		newRdtObject = JSON.stringify(newRdtObject);
+				    	//var queryString = "UPDATE applicationobject SET applicationobject= '" + newApplicationObject + "' where deviceName= '" + deviceNameArray[index] + "'";
+			    		var queryString = "UPDATE applicationobject SET applicationobject= '" + newApplicationObject + "',rdtobject= '" + newRdtObject + "' where deviceName= '" + deviceNameArray[index] + "'";
 						var result = databaseConnection.queryDatabase(queryString);
 					
 			    	}else{
@@ -201,7 +210,6 @@ exports.runSimulationScript = function(res, formdata) {
 			    		console.log(logMessage);
 			    		//console.log(newApplicationObject[extractedMethod]());
 			    	}
-			    	
 				});
 		    }
 		}, 1000);
