@@ -20,6 +20,9 @@ var databaseConnection = require("../Script/mysql_setup.js");
 //SIMULATION SCRIPT
 exports.runSimulationScript = function(res, formdata) {
 
+	conn = databaseConnection.getConnectionObject();
+	
+	//convert the user input a a unit of seconds
 	var simulationDuration = formdata['simulationDuration'];
 	var simulationDurationUnit = formdata['simulationDurationUnit'];
 	
@@ -31,35 +34,178 @@ exports.runSimulationScript = function(res, formdata) {
 	
 	else if (simulationDurationUnit == "Days"){		time =  parseInt(simulationDuration * 60 * 60 * 24);} 
 	
-
-	var NanoTimer = require('nanotimer');
-	 
-	var count = time;
-	 
-	 
-	function main(){
-	    var timer = new NanoTimer();
-	 
-	    timer.setInterval(countDown, '', '1s');
-	    timer.setTimeout(liftOff, [timer], ''+count+'s');
-
-	}
-	 
-	function countDown(){
-	    console.log('T - ' + count);
-	    count--;
-	}
-	 
-	function liftOff(timer){
-	    timer.clearInterval();
-	    console.log("Simulation Time has ELAPSED");
-	    res.end("Simulation Time has ELAPSED")
-	}
-	 
-	main();
+	
+	//declare arrays 
+	var deviceNameArray = [], deviceNameArrayCounter=0;
+	var applicationNameArray = [], applicationNameArrayCounter=0;
+	var applicationMethodArray = [], applicationMethodArrayCounter=0;
+	var applicationObjectArray = [], applicationObjectArrayCounter=0;
+	var rdtObjectArray = [], rdtObjectArrayCounter=0;
+	
+	var arrayOfObjectsMethods = [];
+	var arrayOfObjectsMethodsFinal = [];
+	var appNames = [];
+	
+	var applicationMethods = '';
+	
+	var application = '';
+	var rdt = '';
+	
+	var arr = [];
+	var queryString = "SELECT * from applicationobject";
+	arr[0] = queryString;
+	
+	//get all application installed on devices
+	var readyObjectsForSimulation = function (arr, doneCallback, test) {
 		
+		var queryString = "SELECT * from applicationobject";
+		conn.query(queryString, function(error, results,fields){
+			if(error)
+				throw error;
+			else {
+				
+				for (var i in results) {
+					
+					var deviceName = results[i]['deviceName']; 
+					var applicationName = results[i]['applicationName']; 
+					applicationMethods = results[i]['applicationExecutableMethods']; 
+					var applicationObject = results[i]['applicationObject']; 
+					var rdtObject = results[i]['rdtObject'];
+					
+					//unserialize the objects
+					applicationMethods = JSON.parse(applicationMethods);
+					applicationObject = JSON.parse(applicationObject);
+					rdtObject = JSON.parse(rdtObject);
+					
+					if(typeof applicationObject === 'object'){
+						
+						//get all the signatures of the application
+						for(var i=0; i<applicationMethods.length;i++){ 
+							
+							applicationMethodArray[i] = applicationMethods[i]['signature'];
+							
+							//arrayOfObjectsMethods.push(applicationMethodArray[i]);
+							arrayOfObjectsMethods[i]=applicationMethodArray[i];
+							
+						}
+						
+						arrayOfObjectsMethodsFinal[applicationMethodArrayCounter] = arrayOfObjectsMethods;
+						//console.log("Application Object Methods: "+ arrayOfObjectsMethods);
+						
+						//include the files of the applications and rdts
+						application = require("../Apps/"+applicationName+'.js');
+					}
+					
+					//store them in an array so we can randomize
+					deviceNameArray[deviceNameArrayCounter] = deviceName; 
+					applicationNameArray[applicationNameArrayCounter] = applicationName;
+					applicationObjectArray[applicationObjectArrayCounter] = applicationObject;
+					rdtObjectArray[rdtObjectArrayCounter] = rdtObject;
+					
+					//increment their array index
+					deviceNameArrayCounter++;
+					applicationNameArrayCounter++;
+					applicationMethodArrayCounter++;
+					applicationObjectArrayCounter++;
+					rdtObjectArrayCounter++;
+				
+				}
+				return doneCallback(null);
+			}
+		});
 		
+	};
+	
+	//do this after getting all the information needed
+	async.each(arr, readyObjectsForSimulation, function (err) {
+		
+		var fileName = new Date().getTime();
+		var fs = require("fs");
 
+		//create a log file based on current system time to store simulation
+		fs.writeFile(fileName+'.txt', 'Starting Simulation...\n\n', function (err) {
+	      if (err) throw err;
+	    });
+		
+		var counter = 0;
+		var interval = setInterval( function() {
+
+			counter++;
+			if (counter >= time+1) {
+		    	clearInterval(interval);
+		    }else{
+		    	var dbApplicationObject = '';
+		    	
+		    	//get random application object from array
+		    	var item = applicationObjectArray[Math.floor(Math.random()*applicationObjectArray.length)];
+		    	var index = applicationObjectArray.indexOf(item);
+		    
+		    	var arr2 = [];
+		    	var queryString2 = "SELECT * from applicationobject where deviceName= '" + deviceNameArray[index] + "' AND applicationName='"+ applicationNameArray[index] + "'";
+		    	arr2[0] = queryString2;
+		    	
+		    	//retrieve information of the randomly generated object
+		    	var retrieveObject = function (arr2, doneCallback, test) {
+		    		var queryString2 = "SELECT * from applicationobject where deviceName= '" + deviceNameArray[index] + "' AND applicationName='"+ applicationNameArray[index] + "'";
+					conn.query(queryString2, function(error, results,fields){
+						if(error)
+							throw error;
+						else {
+							for (var i in results) {
+								dbApplicationObject = results[i]['applicationObject']; 
+			    		    }
+							
+							dbApplicationObject = JSON.parse(dbApplicationObject); //serialize the dbApplicationObject
+							
+							return doneCallback(null);
+						}
+					});
+				};
+				
+				//For each of the device passed as an array, we call the deleteDevice function on each one and when we are done we call the doneCallback
+				async.each(arr2, retrieveObject, function (err) {
+					
+					
+					var newApplicationObject = new application(dbApplicationObject);	//pass the serialized object with properties to the application so it doesn't lose its state
+			    	
+			    	var selectedIndexLength = arrayOfObjectsMethodsFinal[index].length;	//gives you the length of the number of methods in that index 
+			    	
+			    	var indexOfRandomFunction = [Math.floor(Math.random() * (selectedIndexLength - 0) + 0)]; //get any random number between 0 and length of the array to execute
+
+			    	var methodItem = arrayOfObjectsMethodsFinal[index][indexOfRandomFunction];	//get the method at a given index
+			    	
+			    	var extractedMethod = methodItem.substring(0, methodItem.length-2);	//extract the signature to take out () so you can call it as a function
+			    	
+			    	//newApplicationObject[extractedMethod]());	//This would call the random method but we are specifically interested in the method addOne for now
+			    	var logMessage = "\nDevice <"+deviceNameArray[index] +">  called the method:-  "+ extractedMethod +"()";
+			    	
+			    	if (extractedMethod =="addOne"){
+
+			    		console.log(logMessage);
+			    		fs.appendFile(fileName+'.txt', logMessage + "\n");
+			    		
+			    		console.log("Old Counter : "+  newApplicationObject["getLocalCounter"]() );
+			    		fs.appendFile(fileName+'.txt', "Old Counter is "+  newApplicationObject["getLocalCounter"]() + "\n");
+			    		
+			    		newApplicationObject[extractedMethod]();
+			    		
+			    		console.log("New Counter : "+  newApplicationObject["getLocalCounter"]());
+			    		fs.appendFile(fileName+'.txt', "New Counter is "+  newApplicationObject["getLocalCounter"]() + "\n");
+			    		
+			    		newApplicationObject = JSON.stringify(newApplicationObject);
+				    	var queryString = "UPDATE applicationobject SET applicationobject= '" + newApplicationObject + "' where deviceName= '" + deviceNameArray[index] + "'";
+						var result = databaseConnection.queryDatabase(queryString);
+					
+			    	}else{
+			 
+			    		console.log(logMessage);
+			    		//console.log(newApplicationObject[extractedMethod]());
+			    	}
+			    	
+				});
+		    }
+		}, 1000);
+	});
 }
 
 

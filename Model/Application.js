@@ -14,6 +14,7 @@ var databaseConnection = require("../Script/mysql_setup.js");
  	7. The Application must have a getExecutableApplicationMethods method which returns an array of excutable functions
  
  	// nodemon --ignore 'C:\Users\Darlington\Desktop\Docs\Dissertation\Simulation Framework\Apps' --debug ./server.js
+ 	//http://localhost:8000/IntegerIncrement.js
 
  */
 
@@ -115,8 +116,9 @@ exports.registerApplication = function(res, formdata) {
 		
 	};
 	
-	
+	//Do this after downloading application from either local server or external server
 	async.each(doNothing, getFile, function (err) {
+		
 		
 		var pathName = url.parse(applicationURL).pathname;
     	var findLastSlash = 0;
@@ -144,10 +146,11 @@ exports.registerApplication = function(res, formdata) {
 		try {
 		    var application = require("../Apps"+pathName);
 		  
-			var applicationObject = new application();
+		    //console.log("Pathname is  "+application);
+			var applicationObject = new application(pathName);
 			
 			var executableMethods = applicationObject.getExecutableApplicationMethods();
-				for(var j=0; j<executableMethods.length;j++){
+			for(var j=0; j<executableMethods.length;j++){
 				//console.log(executableMethods[j]());
 			}
 			
@@ -174,7 +177,7 @@ exports.registerApplication = function(res, formdata) {
 							idExist = true;
 						}
 				    }
-			
+					//check if the application has already been registered
 					if(idExist == false){
 	
 						var application = {
@@ -187,6 +190,7 @@ exports.registerApplication = function(res, formdata) {
 						var queryString = 'INSERT INTO application set ?';
 						var result = databaseConnection.insertRecord(queryString, application);
 						
+						//insert record into applicationSignatureDescription (holds all the methods of an application)
 						var functionObjects = applicationObject.getArrayOfJSONFunctionObjects();
 	
 						for(var i=0; i<functionObjects.length;i++){ //functionObjects.length
@@ -195,7 +199,8 @@ exports.registerApplication = function(res, formdata) {
 		    						applicationId: applicationId,
 		    						applicationName: applicationName,
 									applicationSignature: functionObjects[i]['signature'],
-									applicationSignatureDescription: functionObjects[i]['description']
+									//applicationSignatureDescription: functionObjects[i]['description']
+									applicationSignatureDescription: JSON.stringify(functionObjects[i]['description'])
 							};
 							
 							var queryString = 'INSERT INTO applicationSignatureDescription set ?';
@@ -213,8 +218,9 @@ exports.registerApplication = function(res, formdata) {
 				
 			});
 		} catch(e) {
-		    //process.exit(e.code);
+			console.log(e);
 			//http://localhost:8000/add-content.js
+			//http://localhost:8000/IntegerIncrement.js
 
 			var appName = String(dot);
 			appName = appName.replace(",", ".");
@@ -222,13 +228,15 @@ exports.registerApplication = function(res, formdata) {
 			var filePath = 'C:\\Users\\Darlington\\Desktop\\Docs\\Dissertation\\Simulation Framework\\Apps\\';
 			//var filePath = '/users/labnet5/gr2/dn7241/Desktop/Dissertation/Apps/';
 			
+			
 			fs.unlink(filePath+appName, function (err) {
-				  if (err) throw err;
-				  console.log('successfully deleted');
+				if (err) throw err;
+				 console.log('successfully deleted');
 			});
 			
 			loopChecker = false;
 			res.end("Application is NOT provided in the required form");
+			
 			
 		}
 	});
@@ -373,9 +381,6 @@ exports.browseApplications = function(res, formdata) {
 				table += "<tr>";
 				table += "<td>"+deviceName+"</td>";
 				table += "<td>"+ applicationName +"</td>";
-
-				table += "<td><input type=submit value='Run' id='run'></td>";
-				//table += "<td><button id='"+ deviceName + "'>Run</button></td>";
 				table += "</tr>";
 		    }
 		
@@ -384,10 +389,7 @@ exports.browseApplications = function(res, formdata) {
 			res.end(table);
 		}
 	});
-	
 }
-
-
 
 exports.browseApplication = function(res, formdata) {
 
@@ -414,8 +416,19 @@ exports.browseApplication = function(res, formdata) {
 				
 				table += "<td>"+applicationSignature+"</td>";
 				
-				table += "<td>"+ applicationSignatureDescription +"</td>";
+				applicationSignatureDescription = JSON.parse(applicationSignatureDescription);
+				
+				//If the application signature description is a json object 
+				if(typeof applicationSignatureDescription == 'object'){
 
+					for(var i = 0; i<applicationSignatureDescription.length; i++)
+					{  
+						table += "<td>"+ applicationSignatureDescription[i]['name'] +"</td>";
+					}
+				}else{
+					table += "<td>"+ applicationSignatureDescription +"</td>";
+				}
+	
 				table += "</tr>";
 				
 				counter++;
@@ -439,6 +452,9 @@ exports.installApplication = function(res, formdata) {
 	var applicationObject = new application(applicationName);
 	
 	var RDTs = applicationObject.getRDTs();
+
+	var functionObjects = applicationObject.getArrayOfJSONFunctionObjects();
+	//console.log("Executable Methods are "+ functionObjects);
 	
 	for(var i=0; i<RDTs.length;i++){
 		
@@ -452,10 +468,13 @@ exports.installApplication = function(res, formdata) {
 			
 			var myApplicationObjectSerialized = JSON.stringify(applicationObject);
 			var myRDTObjectSerialized = JSON.stringify(rdtObject);
+			
+			var mySerializedapplicationExecutableMethods = JSON.stringify(functionObjects);
 		
 			var applicationObject = {
 					deviceName: deviceName,
 					applicationName: applicationName,
+					applicationExecutableMethods: mySerializedapplicationExecutableMethods,
 					applicationObject: myApplicationObjectSerialized,
 					rdtObject: myRDTObjectSerialized
 			};
@@ -471,6 +490,7 @@ exports.installApplication = function(res, formdata) {
 		}
 		
 	}
+	
 }
 
 
@@ -479,7 +499,7 @@ exports.IncrementCounterByOne = function(res, formdata) {
 	var installedDeviceName = formdata['installedDeviceName'];
 	var installedApplicationName = formdata['installedApplicationName'];
 	
-	var queryString = "SELECT * from applicationobject where deviceName= '" + installedDeviceName + "' AND applicationName='"+ installedApplicationName + "'";;
+	var queryString = "SELECT * from applicationobject where deviceName= '" + installedDeviceName + "' AND applicationName='"+ installedApplicationName + "'";
 	
 	conn.query(queryString, function(error, results,fields){
 		

@@ -996,6 +996,7 @@
     	//alert("Simulation Duration is "+simulationDuration);
     	//alert("Simulation Unit is "+simulationDurationUnit);
     	
+    
 		var myFormdata = {
 				action: "runSimulationScript",
 				simulationDuration: simulationDuration,

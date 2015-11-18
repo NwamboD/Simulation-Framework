@@ -1,15 +1,15 @@
 
-function IntegerIncrement(IntegerIncrement){
+function IntegerIncrement(newObject){
 	
 	//integerIncrementRDTObject = new IntegerIncrementRDT();
 	
 	//properties/fields
 	//this.localCounter = IntegerIncrement.localCounter;
-	
-	if(IntegerIncrement.localCounter == undefined){
+
+	if(newObject.localCounter == undefined){
 		this.localCounter = 0;
 	} else{
-		this.localCounter = IntegerIncrement.localCounter;
+		this.localCounter = newObject.localCounter;
 	}
 	
 	this.RDT = [
@@ -17,8 +17,8 @@ function IntegerIncrement(IntegerIncrement){
                	name: 'IntegerIncrementRDT',
                	description: 'The IntegerIncrement RDT returns summation of local counter for all devices'
                }
-               	
           ];
+     
 }
 
 IntegerIncrement.prototype.getApplicationDescription = function (){
@@ -55,9 +55,9 @@ IntegerIncrement.prototype.getArrayOfJSONFunctionObjects = function (){
    		},
    		
    		{
-   			signature: 'getRDTInfo()',
+   			signature: 'getRDTs()',
    			//description: 'This method returns the information of the RDTs that the application uses'
-   			description: RDT
+   			description: this.RDT
    		},
    		{
    			signature: 'addOne()',

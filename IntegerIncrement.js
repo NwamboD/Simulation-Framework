@@ -17,7 +17,6 @@ function IntegerIncrement(newObject){
                	name: 'IntegerIncrementRDT',
                	description: 'The IntegerIncrement RDT returns summation of local counter for all devices'
                }
-               	
           ];
      
 }
@@ -56,7 +55,7 @@ IntegerIncrement.prototype.getArrayOfJSONFunctionObjects = function (){
    		},
    		
    		{
-   			signature: 'getRDTInfo()',
+   			signature: 'getRDTs()',
    			//description: 'This method returns the information of the RDTs that the application uses'
    			description: this.RDT
    		},
